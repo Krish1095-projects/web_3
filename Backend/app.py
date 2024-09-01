@@ -164,12 +164,11 @@ def topic_modeling():
 def sentiment_analysis():
     data = request.json
     filename = data.get('filename')
-    # Load your text data from the file (you'll need to implement this)
-    text_data = ["Sample text 1", "Sample text 2", "Sample text 3"]  # Replace with actual text loading logic
-
-    # Perform analysis on each text
+    file_path = os.path.join(os.getcwd(), UPLOAD_FOLDER, filename)
+    # Load data and perform topic modeling
+    documents = load_data(file_path)
     analysis_results = []
-    for text in text_data:
+    for text in documents:
         textblob_result = analyze_textblob(text)
         vader_result = analyze_vader(text)
         emotion_result = analyze_emotions(text)
@@ -193,6 +192,7 @@ def sentiment_analysis():
     emotion_pie_chart = create_emotion_pie_chart(emotion_data)
 
     return jsonify({
+
         'polarity_histogram': json.loads(polarity_histogram),
         'subjectivity_histogram': json.loads(subjectivity_histogram),
         'vader_pie_chart': json.loads(vader_pie_chart),

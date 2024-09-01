@@ -33,7 +33,7 @@ def load_model(model_checkpoint, num_classes):
     model.eval()
     return model, optimizer , device
 
-model_checkpoint = os.path.join(os.getcwd(),'bertbased (1).pt')
+model_checkpoint = os.path.join(os.getcwd(),'bertbased.pt')
 model, optimizer,device = load_model(model_checkpoint, num_classes=2)
 quantized_model = torch.quantization.quantize_dynamic(
     model,

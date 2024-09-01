@@ -64,13 +64,26 @@ def create_vader_pie_chart(vader_data):
 
 def create_emotion_pie_chart(emotion_data):
     """Create a pie chart for emotion distribution using Plotly."""
-    emotion_sums = {key: 0 for key in emotion_data[0].keys()}
+    # Initialize emotion_sums with all possible emotion keys set to 0
+    emotion_sums = {
+        'anger': 0,
+        'joy': 0,
+        'sadness': 0,
+        'fear': 0,
+        'surprise': 0,
+        'disgust': 0,
+        'neutral': 0  # Add all possible emotions based on your model's output
+    }
+    # Accumulate the scores for each emotion
     for emotion in emotion_data:
         for key, value in emotion.items():
-            emotion_sums[key] += value
-
+            if key in emotion_sums:
+                emotion_sums[key] += value
+            else:
+                emotion_sums[key] = value  # Initialize if the key was missing
     labels = list(emotion_sums.keys())
     values = list(emotion_sums.values())
+    # Create the pie chart
     fig = go.Figure(data=[go.Pie(labels=labels, values=values)])
     fig.update_layout(title='Emotion Distribution')
     return pio.to_json(fig)

@@ -10,6 +10,7 @@ import os
 
 
 # Initialize NLTK resources
+nltk.download('punkt_tab')
 nltk.download('punkt')
 nltk.download('stopwords')
 
