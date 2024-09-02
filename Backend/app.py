@@ -8,7 +8,7 @@ from descriptive_stats import *
 import pandas as pd
 from Topic_model import *
 from sentiment import  *
-
+from keywords import *
 
 app = Flask(__name__, template_folder='templates')
 UPLOAD_FOLDER = 'uploads'
@@ -198,6 +198,31 @@ def sentiment_analysis():
         'vader_pie_chart': json.loads(vader_pie_chart),
         'emotion_pie_chart': json.loads(emotion_pie_chart)
     })
+
+@app.route('/keyword_extraction', methods=['POST'])
+def keyword_extraction():
+    data = request.json
+    filename = data.get('filename')
+    top_n = data.get('top_n', 10)
+
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
+
+    file_path = os.path.join(os.getcwd(), UPLOAD_FOLDER, filename)
+    # Load data and perform topic modeling
+    documents = load_data(file_path)
+
+    top_n = int(top_n)
+    top_keywords = extract_keywords_tfidf(documents,top_n=top_n)
+    tfidf_figures = plot_tfidf_keywords(top_keywords, top_n=top_n)
+    word2vec_figure = generate_word2vec_word_cloud(documents, top_n=top_n)
+
+    results = {
+        "tfidf_figures": json.loads(tfidf_figures),
+        "word2vec_figure": json.loads(word2vec_figure)
+    }
+
+    return jsonify(results), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

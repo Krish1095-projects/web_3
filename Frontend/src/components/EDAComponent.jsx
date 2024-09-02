@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState } from 'react';
 import { useFileContext } from '../context/FileContext';
 import HeaderComponent from "./Header";
 import { MenuAlt1Icon, XIcon } from '@heroicons/react/outline';
@@ -6,6 +6,7 @@ import DescriptiveStatisticsTable from './DescriptiveStatisticsTable';
 import DescriptiveStatisticsGraph from './DescriptiveStatisticsGraph';
 import TopicModelingVisualization from './TopicModelingVisualization'; // Adjust the path as needed
 import SentimentAnalysisVisualization from './SentimentAnalysisVisualization';
+import KeywordExtractionVisualization from './KeywordExtractionVisualization';
 
 
 const EDADashboard = () => {
@@ -14,9 +15,9 @@ const EDADashboard = () => {
     const [showTextAnalysisSubMenu, setShowTextAnalysisSubMenu] = useState(false);
     const [showDataDistributionSubMenu, setShowDataDistributionSubMenu] = useState(false);
     const [content, setContent] = useState(null); // State to manage right panel content
-    const [numTopics, setNumTopics] = useState(100);
+    const [numTopics, setNumTopics] = useState(25);
     const [loading, setLoading] = useState(false); // State to manage loading
-
+    const [topN, setTopN] = useState(10); // State for top_n
 
     const togglePanel = () => {
         setIsPanelOpen(prevState => !prevState); // Toggle panel visibility
@@ -28,6 +29,12 @@ const EDADashboard = () => {
 
     const toggleDataDistributionSubMenu = () => {
         setShowDataDistributionSubMenu(prevState => !prevState);
+    };
+
+    const handleTopNChange = (newTopN) => {
+        // Logic to update the visualizations based on the new top_n value
+        console.log('Updated Top N:', newTopN);
+        // Optionally, trigger an API call to fetch new results
     };
 
     const handleDescriptiveStats = async () => {
@@ -222,6 +229,40 @@ const EDADashboard = () => {
         }
     };
 
+    const handlekeyword_extraction = async () => {
+        if (!filename) {
+            alert("No filename available. Please upload a file.");
+            return;
+        }
+        setLoading(true); // Start loading
+    
+        try {
+            const response = await fetch("http://localhost:5000/keyword_extraction", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ filename, top_n: topN }),
+            });
+    
+            if (response.ok) {
+                const results = await response.json();
+    
+                setContent(
+                    <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+                    <KeywordExtractionVisualization results={results} onTopNChange={handleTopNChange} />    
+                    </div>
+                );
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error}`);
+            }
+        } catch (error) {
+            console.error("Error fetching keyword_extraction results:", error);
+        } finally {
+            setLoading(false); // Stop loading
+        }
+    };
     return (
         <div className="flex flex-col h-screen bg-gray-100">
             <HeaderComponent />
@@ -261,7 +302,8 @@ const EDADashboard = () => {
                             <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105"
                             onClick={handleSentimentAnalysis}
                             >Sentiment Analysis</button>
-                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105">Keyword Extraction</button>
+                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105"
+                            onClick={handlekeyword_extraction}>Keyword Extraction</button>
                         </div>
                     )}
 
