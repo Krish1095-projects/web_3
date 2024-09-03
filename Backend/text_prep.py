@@ -4,11 +4,9 @@ import re
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from nltk.stem import PorterStemmer
 import demoji
 
 # Download NLTK stopwords if not already downloaded
-nltk.download('stopwords')
 nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
@@ -22,6 +20,17 @@ punctuation_number_pattern = re.compile(r'[^a-zA-Z\s]')  # Removes special chara
 # Initialize the lemmatizer and stop words
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
+
+def get_column_name(df, possible_names):
+    """
+    Function to get the first matching column name from the DataFrame based on a list of possible names.
+    """
+    for name in possible_names:
+        if name in df.columns:
+            return name
+    return None  # Return None if no matching column is found
+
+
 
 def get_wordnet_pos(treebank_tag):
     """Map NLTK POS tags to WordNet POS tags."""
@@ -51,7 +60,14 @@ def lemmatize_tweet(tweet):
     )
     
     return lemmatized_tweet
-# Initialize stemmer
+
+def remove_suffix_from_dates(text):
+    """Remove 'th', 'rd', 'nd', 'st' from dates in the given text."""
+    # Regular expression pattern to match dates with suffixes
+    pattern = r'\b(\d{1,2})(st|nd|rd|th|rt|RT)\b'
+    # Replace the matched patterns with just the number
+    cleaned_text = re.sub(pattern, r'\1', text)
+    return cleaned_text
 
 
 def clean_tweet(tweet):
@@ -68,7 +84,7 @@ def clean_tweet(tweet):
     tweet = re.sub(link_pattern, '', tweet)
     tweet = re.sub(mention_pattern, '', tweet)
     tweet = re.sub(hashtag_pattern, '', tweet)
-    
+    tweet = remove_suffix_from_dates(tweet)
     # Remove punctuation, numbers, and special characters
     tweet = re.sub(punctuation_number_pattern, '', tweet)
     
@@ -83,21 +99,27 @@ def clean_tweet(tweet):
     
     return tweet.strip()
 
-def process_tweets_in_chunks(df, chunk_size=10000):
+
+def process_tweets_in_chunks(data, chunk_size=10000):
     """
     Processes tweets in chunks using Dask for parallel processing.
 
     Parameters:
-    df (pd.DataFrame): The DataFrame containing tweets.
+    data (pd.DataFrame or pd.Series): The DataFrame or Series containing tweets.
     chunk_size (int): The size of each chunk to process.
 
     Returns:
     pd.Series: A series of cleaned tweet texts.
     """
-    # Convert DataFrame to Dask DataFrame
-    ddf = dd.from_pandas(df, npartitions=len(df) // chunk_size + 1)
+    if isinstance(data, pd.DataFrame):
+        text_col_names = ['tweet', 'Tweet', 'text', 'Text', 'clean_text', 'Clean_text']
+        text_col = get_column_name(data, text_col_names)
+        data = data[text_col]  # Extract the relevant text column
 
+    # Convert the Series to a Dask DataFrame
+    ddf = dd.from_pandas(data, npartitions=len(data) // chunk_size + 1)
+    
     # Apply the cleaning function to each tweet in parallel
-    cleaned_tweets = ddf['Tweet'].map(clean_tweet, meta=('Tweet', 'str')).compute()
+    cleaned_tweets = ddf.map(clean_tweet, meta=('str')).compute()
 
     return cleaned_tweets
