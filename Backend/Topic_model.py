@@ -8,12 +8,6 @@ from nltk.corpus import stopwords
 import nltk
 import os
 
-
-# Initialize NLTK resources
-nltk.download('punkt_tab')
-nltk.download('punkt')
-nltk.download('stopwords')
-
 def preprocess(text):
     stop_words = set(stopwords.words('english'))
     tokens = word_tokenize(text.lower())
@@ -37,7 +31,26 @@ def load_data(filename):
         raise ValueError("No suitable text column found in the data.")
     
     # Return the content of the identified text column(s) as a list
-    return df[text_columns[0]].dropna().tolist()
+    return df[text_columns[0]].dropna().sample(2000,random_state=42).tolist()
+
+def load_data_df(filename):
+     # Load the data based on the file extension
+    if filename.endswith('.csv'):
+        df = pd.read_csv(filename)
+    elif filename.endswith('.xlsx'):
+        df = pd.read_excel(filename)
+    elif filename.endswith('.json'):
+        df = pd.read_json(filename)
+    else:
+        raise ValueError("Unsupported file format. Please use CSV, Excel, or JSON.")
+    
+    text_columns = [col for col in df.columns if col in ('tweet', 'Tweet', 'text', 'Text', 'clean_text', 'Clean_text')]
+    
+    if not text_columns:
+        raise ValueError("No suitable text column found in the data.")
+    
+    # Return the content of the identified text column(s) as a list
+    return df.dropna()
 
 def create_lda_model(documents, num_topics=5, passes=15):
     processed_docs = [preprocess(doc) for doc in documents]

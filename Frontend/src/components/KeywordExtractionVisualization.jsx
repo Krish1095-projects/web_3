@@ -15,7 +15,6 @@ const KeywordExtractionVisualization = ({ results, onTopNChange }) => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        // Call the parent function to handle the top_n change
         if (onTopNChange) {
             onTopNChange(topN);
         }

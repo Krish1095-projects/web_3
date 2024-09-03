@@ -6,12 +6,21 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import plotly.graph_objs as go
 import plotly.io as pio
 import json
+from text_prep import *
 
-nltk.download('vader_lexicon')
 
 # Initialize sentiment analysis pipelines
 emotion_analyzer = pipeline('sentiment-analysis', model="j-hartmann/emotion-english-distilroberta-base", top_k=1)
 vader_analyzer = SentimentIntensityAnalyzer()
+
+def get_column_name(df, possible_names):
+    """
+    Function to get the first matching column name from the DataFrame based on a list of possible names.
+    """
+    for name in possible_names:
+        if name in df.columns:
+            return name
+    return None  # Return None if no matching column is found
 
 def analyze_textblob(text):
     """Analyze polarity and subjectivity using TextBlob."""
@@ -87,3 +96,34 @@ def create_emotion_pie_chart(emotion_data):
     fig = go.Figure(data=[go.Pie(labels=labels, values=values)])
     fig.update_layout(title='Emotion Distribution')
     return pio.to_json(fig)
+
+def handle_sentiments(df):
+    text_col_names = ['tweet', 'Tweet', 'text', 'Text', 'clean_text', 'Clean_text']
+    text_col = get_column_name(df, text_col_names)
+    df['clean_text'] = process_tweets_in_chunks(df[text_col])
+
+    analysis_results = []
+    for text in df['clean_text']:
+        textblob_result = analyze_textblob(text)
+        vader_result = analyze_vader(text)
+        emotion_result = analyze_emotions(text)
+        analysis_results.append({
+            'text': text,
+            'textblob': textblob_result,
+            'vader': vader_result,
+            'emotions': emotion_result
+        })
+
+    # Extract data for visualizations
+    polarity_data = [result['textblob']['polarity'] for result in analysis_results]
+    subjectivity_data = [result['textblob']['subjectivity'] for result in analysis_results]
+    vader_data = [result['vader'] for result in analysis_results]
+    emotion_data = [result['emotions'] for result in analysis_results]
+
+    # Create visualizations
+    polarity_histogram = create_polarity_histogram(polarity_data)
+    subjectivity_histogram = create_subjectivity_histogram(subjectivity_data)
+    vader_pie_chart = create_vader_pie_chart(vader_data)
+    emotion_pie_chart = create_emotion_pie_chart(emotion_data)
+    
+    return polarity_histogram,subjectivity_histogram,vader_pie_chart,emotion_pie_chart

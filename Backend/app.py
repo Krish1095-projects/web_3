@@ -9,6 +9,15 @@ import pandas as pd
 from Topic_model import *
 from sentiment import  *
 from keywords import *
+from wordclouds import *
+from text_stats import *
+import nltk
+import warnings
+
+warnings.filterwarnings('ignore')
+# Initialize NLTK resources
+nltk.download('all',quiet=True)
+
 
 app = Flask(__name__, template_folder='templates')
 UPLOAD_FOLDER = 'uploads'
@@ -166,30 +175,8 @@ def sentiment_analysis():
     filename = data.get('filename')
     file_path = os.path.join(os.getcwd(), UPLOAD_FOLDER, filename)
     # Load data and perform topic modeling
-    documents = load_data(file_path)
-    analysis_results = []
-    for text in documents:
-        textblob_result = analyze_textblob(text)
-        vader_result = analyze_vader(text)
-        emotion_result = analyze_emotions(text)
-        analysis_results.append({
-            'text': text,
-            'textblob': textblob_result,
-            'vader': vader_result,
-            'emotions': emotion_result
-        })
-
-    # Extract data for visualizations
-    polarity_data = [result['textblob']['polarity'] for result in analysis_results]
-    subjectivity_data = [result['textblob']['subjectivity'] for result in analysis_results]
-    vader_data = [result['vader'] for result in analysis_results]
-    emotion_data = [result['emotions'] for result in analysis_results]
-
-    # Create visualizations
-    polarity_histogram = create_polarity_histogram(polarity_data)
-    subjectivity_histogram = create_subjectivity_histogram(subjectivity_data)
-    vader_pie_chart = create_vader_pie_chart(vader_data)
-    emotion_pie_chart = create_emotion_pie_chart(emotion_data)
+    documents = load_data_df(file_path)
+    polarity_histogram,subjectivity_histogram,vader_pie_chart,emotion_pie_chart = handle_sentiments(documents)
 
     return jsonify({
 
@@ -203,8 +190,7 @@ def sentiment_analysis():
 def keyword_extraction():
     data = request.json
     filename = data.get('filename')
-    top_n = data.get('top_n', 10)
-
+    top_n = data.get('top_n',25)
     if not filename:
         return jsonify({"error": "Filename not provided"}), 400
 
@@ -212,7 +198,7 @@ def keyword_extraction():
     # Load data and perform topic modeling
     documents = load_data(file_path)
 
-    top_n = int(top_n)
+    
     top_keywords = extract_keywords_tfidf(documents,top_n=top_n)
     tfidf_figures = plot_tfidf_keywords(top_keywords, top_n=top_n)
     word2vec_figure = generate_word2vec_word_cloud(documents, top_n=top_n)
@@ -223,6 +209,67 @@ def keyword_extraction():
     }
 
     return jsonify(results), 200
+
+@app.route('/wordclouds', methods=['POST'])
+def wordclouds_generate():
+    data = request.json
+    filename = data.get('filename')
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
+
+    file_path = os.path.join(os.getcwd(), UPLOAD_FOLDER, filename)
+    
+    # Load data and perform topic modeling
+    df = load_data_df(file_path)
+
+    # Generate the word cloud plots from the DataFrame for each label
+    wordcloud_plots = generate_wordclouds_for_labels(df)
+
+    results = {
+        "wordcloud_plots":wordcloud_plots
+    } 
+    return jsonify(results), 200
+
+@app.route('/histograms', methods=['POST'])
+def text_statistics():
+    data = request.json
+    filename = data.get('filename')
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
+
+    file_path = os.path.join(os.getcwd(), UPLOAD_FOLDER, filename)
+    
+    # Load data into DataFrame
+    df = load_data_df(file_path)
+
+    # Check for timestamp column
+    timestamp_col_names = ['Date', 'date', 'created_at']
+    timestamp_col = get_column_name(df, timestamp_col_names)
+
+    if timestamp_col is None:
+        # If no timestamp column, only calculate text statistics
+        character_count_fig, sentence_length_fig, word_count_fig = calculate_text_statistics(df)
+        results = {
+            "character_count_fig": character_count_fig,
+            "sentence_length_fig": sentence_length_fig,
+            "word_count_fig": word_count_fig,
+        }
+        return jsonify(results), 200
+
+    # If timestamp column is found, calculate both text statistics and time series
+    else:
+        character_count_fig, sentence_length_fig, word_count_fig = calculate_text_statistics(df)
+        time_series_fig = time_series_document_lengths(df)
+
+        results = {
+            "character_count_fig": character_count_fig,
+            "sentence_length_fig": sentence_length_fig,
+            "word_count_fig": word_count_fig,
+            "time_series_fig": time_series_fig
+        } 
+        return jsonify(results), 200
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

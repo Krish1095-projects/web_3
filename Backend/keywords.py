@@ -10,10 +10,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 
-# Ensure you have downloaded the necessary NLTK data
-import nltk
-nltk.download('punkt')
-nltk.download('stopwords')
 
 # Ensure the directory for saving images exists
 os.makedirs('static/visualizations', exist_ok=True)

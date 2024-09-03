@@ -7,7 +7,8 @@ import DescriptiveStatisticsGraph from './DescriptiveStatisticsGraph';
 import TopicModelingVisualization from './TopicModelingVisualization'; // Adjust the path as needed
 import SentimentAnalysisVisualization from './SentimentAnalysisVisualization';
 import KeywordExtractionVisualization from './KeywordExtractionVisualization';
-
+import WordCloudVisualization from './WordCloudVisualization';
+import HistogramComponent from './HistogramComponent';
 
 const EDADashboard = () => {
     const { filename } = useFileContext(); // Get the filename from context
@@ -17,7 +18,7 @@ const EDADashboard = () => {
     const [content, setContent] = useState(null); // State to manage right panel content
     const [numTopics, setNumTopics] = useState(25);
     const [loading, setLoading] = useState(false); // State to manage loading
-    const [topN, setTopN] = useState(10); // State for top_n
+    const [topN, setTopN] = useState(); // State for top_n
 
     const togglePanel = () => {
         setIsPanelOpen(prevState => !prevState); // Toggle panel visibility
@@ -33,7 +34,7 @@ const EDADashboard = () => {
 
     const handleTopNChange = (newTopN) => {
         // Logic to update the visualizations based on the new top_n value
-        console.log('Updated Top N:', newTopN);
+        handlekeyword_extraction(newTopN)
         // Optionally, trigger an API call to fetch new results
     };
 
@@ -242,7 +243,7 @@ const EDADashboard = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ filename, top_n: topN }),
+                body: JSON.stringify({ filename, top_n: setTopN }),
             });
     
             if (response.ok) {
@@ -263,6 +264,76 @@ const EDADashboard = () => {
             setLoading(false); // Stop loading
         }
     };
+
+    const handlewordclouds= async () => {
+        if (!filename) {
+            alert("No filename available. Please upload a file.");
+            return;
+        }
+        setLoading(true); // Start loading
+    
+        try {
+            const response = await fetch("http://localhost:5000/wordclouds", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({filename}),
+            });
+    
+            if (response.ok) {
+                const results = await response.json();
+    
+                setContent(
+                    <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+                    <WordCloudVisualization wordcloudPlots={results.wordcloud_plots}/>    
+                    </div>
+                );
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error}`);
+            }
+        } catch (error) {
+            console.error("Error fetching word_cloud generated results:", error);
+        } finally {
+            setLoading(false); // Stop loading
+        }
+    };
+    const handlehistograms= async () => {
+        if (!filename) {
+            alert("No filename available. Please upload a file.");
+            return;
+        }
+        setLoading(true); // Start loading
+    
+        try {
+            const response = await fetch("http://localhost:5000/histograms", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({filename}),
+            });
+    
+            if (response.ok) {
+                const results = await response.json();
+    
+                setContent(
+                    <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+                    <HistogramComponent results={results}/>    
+                    </div>
+                );
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error}`);
+            }
+        } catch (error) {
+            console.error("Error fetching word_cloud generated results:", error);
+        } finally {
+            setLoading(false); // Stop loading
+        }
+    };
+
     return (
         <div className="flex flex-col h-screen bg-gray-100">
             <HeaderComponent />
@@ -296,12 +367,12 @@ const EDADashboard = () => {
                     </button>
                     {showTextAnalysisSubMenu && (
                         <div className="pl-4 mb-2 flex flex-col items-start space-y-1"> {/* Left aligned with spacing */}
-                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105" 
-                            onClick={handleTopicModeling}
-                            >Topic Modeling</button>
                             <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105"
                             onClick={handleSentimentAnalysis}
                             >Sentiment Analysis</button>
+                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105" 
+                            onClick={handleTopicModeling}
+                            >Topic Modeling</button>
                             <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105"
                             onClick={handlekeyword_extraction}>Keyword Extraction</button>
                         </div>
@@ -315,9 +386,10 @@ const EDADashboard = () => {
                     </button>
                     {showDataDistributionSubMenu && (
                         <div className="pl-4 mb-2 flex flex-col items-start space-y-1"> {/* Left aligned with spacing */}
-                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105">Histogram</button>
-                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105">Word Cloud Plot</button>
-                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105">Frequency Distribution Plot</button>
+                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105"
+                            onClick={handlehistograms}>Histogram</button>
+                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105"
+                            onClick={handlewordclouds}>Word Cloud Plot</button>
                             <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105">N-gram Analysis</button>
                         </div>
                     )}
