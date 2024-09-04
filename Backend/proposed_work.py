@@ -62,11 +62,6 @@ def build_model(vocab_size, type_vocab, max_position_embedding, model_name,
     # Check if CUDA is available, and set the device accordingly
     device = torch.device('cpu')
 
-    if torch.cuda.is_available():
-        print("Using GPU!")
-    else:
-        print("CUDA is not available. Using CPU.")
-
     # Load the pre-trained BERT model and tokenizer
     tokenizer = BertTokenizer.from_pretrained(str(model_name))
     
@@ -96,56 +91,33 @@ def load_model(model_checkpoint):
     model.load_state_dict(checkpoint['model'])
     optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5)
     optimizer.load_state_dict(checkpoint['optimizer'])
-    return model, optimizer, device
-
-
-model_checkpoint = os.path.join(os.getcwd(),'bert_weights_epoch_1_92.187 (1).pt')
-model, optimizer,device = load_model(model_checkpoint)
-
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-
-
-
-
-
-# ## Functions ## 
-# def classify_tweet_proposed(tweet, model,tokenizer, device):
-#     # Tokenize the input tweet
-#     inputs = tokenizer(tweet, return_tensors="pt", truncation=True, padding=True)
-#     input_ids = inputs['input_ids'].to(device)
-#     attentions = inputs['attention_mask'].to(device)
-    
-#     # Forward pass through the model
-#     with torch.no_grad():
-#         logits, _ = model(input_ids, attentions)
-    
-#     # Apply sigmoid to get probabilities
-#     probabilities = torch.sigmoid(logits)
-    
-#     return probabilities.tolist()
-
-# Set random seed for reproducibility
-def set_seed(seed):
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
-
-# Function to classify tweet
-def classify_tweet_proposed(tweet, model, tokenizer, device, seed=42):
-    # Set seed
-    set_seed(seed)
     
     # Ensure the model is in evaluation mode
     model.eval()
     
+    return model, optimizer, device
+
+
+model_checkpoint = os.path.join(os.getcwd(),'bert_weights_epoch_1_92.187.pt')
+model, optimizer,device = load_model(model_checkpoint)
+quantized_model = torch.quantization.quantize_dynamic(
+    model,
+    {torch.nn.Linear},
+    dtype=torch.qint8  # Use int8 for quantization
+)
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+
+# Function to classify tweet
+def classify_tweet_proposed(tweet, device):
+    quantized_model.eval()
     # Tokenize the input tweet
-    inputs = tokenizer(tweet, return_tensors="pt", truncation=True, padding=True)
+    inputs = tokenizer(tweet, return_tensors="pt", truncation=True, padding=True,max_length=140)
     input_ids = inputs['input_ids'].to(device)
     attentions = inputs['attention_mask'].to(device)
     
     # Forward pass through the model
     with torch.no_grad():
-        logits, _ = model(input_ids, attentions)
+        logits, _ = quantized_model(input_ids, attentions)
     
     # Apply sigmoid to get probabilities
     probabilities = torch.sigmoid(logits)

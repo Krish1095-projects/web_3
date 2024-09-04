@@ -4,7 +4,7 @@ from transformers import BertModel, BertTokenizer
 import os
 import pandas as pd 
 import numpy as np
-from existing_work import *
+from proposed_work import *
 from text_prep import *
 
 def classify_tweet(tweet,device):
@@ -12,7 +12,7 @@ def classify_tweet(tweet,device):
     input_ids = inputs['input_ids'].to(device)
     attentions = inputs['attention_mask'].to(device)
     with torch.no_grad():
-        outputs = quantized_model(input_ids, attentions)
+        outputs,_ = quantized_model(input_ids, attentions)
     probabilities = torch.sigmoid(outputs)
     return probabilities.tolist()
 

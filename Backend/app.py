@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify,render_template
 import re
 from flask_cors import CORS
-from existing_work import classify_tweet as classify_tweet_existing, device as device_existing
+from proposed_work import classify_tweet_proposed,device
 import lime_analysis
 import os
 from text_prep import *
@@ -39,7 +39,7 @@ CORS(app)
 def classify_existing():
     data = request.get_json()
     tweet = data.get('tweet_text', '')
-    probabilities = classify_tweet_existing(tweet, device=device_existing)
+    probabilities = classify_tweet_proposed(tweet, device=device)
     return jsonify({'probabilities': probabilities})
 
 @app.route('/explain', methods=['POST'])

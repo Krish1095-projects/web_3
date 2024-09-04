@@ -8,24 +8,8 @@ import os
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import torch.amp
-from existing_work import *
-import nltk 
-
-stopwords_list =stopwords.words(['english','spanish','french','german','dutch'])
-# Create a set from the stop words list
-stop_words = set(stopwords_list)
-
-def remove_stopwords(text_data):
-    # Tokenize the text data
-    words = word_tokenize(text_data)
-
-    # Remove stopwords
-    filtered_words = [word for word in words if word.lower() not in stop_words]
-
-    # Join the filtered words back into a string
-    filtered_text = ' '.join(filtered_words)
-
-    return filtered_text
+from proposed_work import *
+from text_prep import clean_tweet
 
 # Wrapper function for the BERT model
 def bert_predict_proba(texts):
@@ -33,7 +17,7 @@ def bert_predict_proba(texts):
     input_ids = inputs['input_ids'].to(device)
     attention_mask = inputs['attention_mask'].to(device)
     with torch.no_grad():
-        logits = quantized_model(input_ids, attention_mask)
+        logits,_ = quantized_model(input_ids, attention_mask)
         probabilities = torch.sigmoid(logits)
     return probabilities.cpu().numpy()
 
@@ -43,7 +27,7 @@ explainer = lime.lime_text.LimeTextExplainer()
 def explain_text(explainer, text_data):
     try:
 
-        data = remove_stopwords(text_data)
+        data = clean_tweet(text_data)
         # Explain the model's prediction for the chosen instance
         explanation = explainer.explain_instance(data, bert_predict_proba)
 
