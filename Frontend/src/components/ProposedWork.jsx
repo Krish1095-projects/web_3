@@ -161,6 +161,10 @@ const ProposedWork = () => {
   const handleEDANav = () => {
     navigate("/proposed/eda-dashboard"); // Change this route to your EDA Dashboard path
   };
+
+  const handlePredictiveAnalysisNav = () => {
+    navigate("/proposed/classify_samples"); // Change this route to your EDA Dashboard path
+  };
   
   return (
     <FileProvider>
@@ -243,7 +247,8 @@ const ProposedWork = () => {
                 >
                   EDA Report
                 </button>
-                <button className="px-6 py-2 bg-red-500 text-white rounded-md focus:outline-none hover:bg-red-600">
+                <button className="px-6 py-2 bg-red-500 text-white rounded-md focus:outline-none hover:bg-red-600"
+                onClick={handlePredictiveAnalysisNav}>
                   Predictive Analysis
                 </button>
               </div>

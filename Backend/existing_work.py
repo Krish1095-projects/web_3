@@ -1,4 +1,3 @@
-from flask import Flask, request, jsonify
 import torch
 import torch.nn as nn
 from transformers import BertModel, BertTokenizer
@@ -30,6 +29,7 @@ def load_model(model_checkpoint, num_classes):
     model, optimizer, device, num_classes = build_model(num_classes)
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    
     model.eval()
     return model, optimizer , device
 

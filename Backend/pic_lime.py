@@ -10,7 +10,6 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 import nltk
-nltk.download('punkt')
 import os
 import pickle
 # Load your data into df

@@ -10,8 +10,7 @@ from nltk.tokenize import word_tokenize
 import torch.amp
 from existing_work import *
 import nltk 
-nltk.download('stopwords')
-nltk.download('punkt')
+
 stopwords_list =stopwords.words(['english','spanish','french','german','dutch'])
 # Create a set from the stop words list
 stop_words = set(stopwords_list)

@@ -6,11 +6,6 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 import demoji
 
-# Download NLTK stopwords if not already downloaded
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
-nltk.download('wordnet')
-
 # Compile regular expressions
 link_pattern = re.compile(r'http\S+|www\S+|https\S+', flags=re.MULTILINE)
 mention_pattern = re.compile(r'@\w+')

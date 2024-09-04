@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useFileContext } from '../context/FileContext';
+import axios from 'axios';
 import HeaderComponent from "./Header";
 import { MenuAlt1Icon, XIcon } from '@heroicons/react/outline';
 import DescriptiveStatisticsTable from './DescriptiveStatisticsTable';
@@ -9,6 +10,7 @@ import SentimentAnalysisVisualization from './SentimentAnalysisVisualization';
 import KeywordExtractionVisualization from './KeywordExtractionVisualization';
 import WordCloudVisualization from './WordCloudVisualization';
 import HistogramComponent from './HistogramComponent';
+import NGramVisualization from './NGramVisualization';
 
 const EDADashboard = () => {
     const { filename } = useFileContext(); // Get the filename from context
@@ -19,6 +21,7 @@ const EDADashboard = () => {
     const [numTopics, setNumTopics] = useState(25);
     const [loading, setLoading] = useState(false); // State to manage loading
     const [topN, setTopN] = useState(); // State for top_n
+    const [n_gram, setN_gram] = useState([1,6]); // State for top_n
 
     const togglePanel = () => {
         setIsPanelOpen(prevState => !prevState); // Toggle panel visibility
@@ -32,10 +35,22 @@ const EDADashboard = () => {
         setShowDataDistributionSubMenu(prevState => !prevState);
     };
 
-    const handleTopNChange = (newTopN) => {
-        // Logic to update the visualizations based on the new top_n value
-        handlekeyword_extraction(newTopN)
-        // Optionally, trigger an API call to fetch new results
+    const handleTopNChange = async (newTopN) => {
+        setLoading(true)
+        try {
+            console.log("New topN value received:", newTopN); 
+            setTopN(newTopN);
+            const response = await axios.post('http://localhost:5000/keyword_extraction', { top_n: newTopN, filename });
+            setContent(
+                <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+                    <KeywordExtractionVisualization results={response.data} />
+                </div>
+            );
+        } catch (error) {
+            console.error('Error fetching updated keyword extraction results:', error);
+        }finally{
+            setLoading(false); // Stop loading
+        }
     };
 
     const handleDescriptiveStats = async () => {
@@ -243,7 +258,7 @@ const EDADashboard = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ filename, top_n: setTopN }),
+                body: JSON.stringify({ filename, top_n: topN }),
             });
     
             if (response.ok) {
@@ -334,6 +349,42 @@ const EDADashboard = () => {
         }
     };
 
+    const handleNgramsanalysis= async () => {
+        if (!filename) {
+            alert("No filename available. Please upload a file.");
+            return;
+        }
+        setLoading(true); // Start loading
+    
+        try {
+            const response = await fetch("http://localhost:5000/ngrams_analysis", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({filename, n_range:n_gram}),
+            });
+    
+            if (response.ok) {
+                const results = await response.json();
+    
+                setContent(
+                    <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+                    <NGramVisualization plots ={results}/>
+                    </div>
+                );
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error}`);
+            }
+        } catch (error) {
+            console.error("Error fetching word_cloud generated results:", error);
+        } finally {
+            setLoading(false); // Stop loading
+        }
+    };
+
+
     return (
         <div className="flex flex-col h-screen bg-gray-100">
             <HeaderComponent />
@@ -390,7 +441,8 @@ const EDADashboard = () => {
                             onClick={handlehistograms}>Histogram</button>
                             <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105"
                             onClick={handlewordclouds}>Word Cloud Plot</button>
-                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105">N-gram Analysis</button>
+                            <button className="py-2 px-3 bg-red-400 hover:bg-red-300 transition duration-200 rounded-md w-60 text-left transform hover:scale-105"
+                            onClick = {handleNgramsanalysis}>N-gram Analysis</button>
                         </div>
                     )}
 

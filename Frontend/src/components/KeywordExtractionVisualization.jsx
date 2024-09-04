@@ -15,7 +15,8 @@ const KeywordExtractionVisualization = ({ results, onTopNChange }) => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        if (onTopNChange) {
+        console.log("Submitting topN:", topN);
+        if (onTopNChange && (topN !== results.topN)) { // Only call if topN is different
             onTopNChange(topN);
         }
     };
