@@ -4,6 +4,7 @@ from flask_cors import CORS
 from existing_work import classify_tweet as classify_tweet_existing, device as device_existing
 import lime_analysis
 import os
+from text_prep import *
 from descriptive_stats import *
 import pandas as pd
 from Topic_model import *
@@ -11,13 +12,14 @@ from sentiment import  *
 from keywords import *
 from wordclouds import *
 from text_stats import *
+from classify_multi_tweet import *
+from Ngrams_analysis import *
 import nltk
 import warnings
 
 warnings.filterwarnings('ignore')
 # Initialize NLTK resources
 nltk.download('all',quiet=True)
-
 
 app = Flask(__name__, template_folder='templates')
 UPLOAD_FOLDER = 'uploads'
@@ -190,18 +192,23 @@ def sentiment_analysis():
 def keyword_extraction():
     data = request.json
     filename = data.get('filename')
-    top_n = data.get('top_n',25)
+    top_n = data.get('top_n',10)
     if not filename:
         return jsonify({"error": "Filename not provided"}), 400
 
     file_path = os.path.join(os.getcwd(), UPLOAD_FOLDER, filename)
     # Load data and perform topic modeling
-    documents = load_data(file_path)
-
+    documents = load_data_df(file_path)
     
-    top_keywords = extract_keywords_tfidf(documents,top_n=top_n)
+    text_col_names = ['tweet', 'Tweet', 'text', 'Text', 'clean_text', 'Clean_text']
+    text_col = get_column_name(documents,text_col_names)
+    documents['clean_text'] = process_tweets_in_chunks(documents[text_col])
+    
+    document = documents['clean_text'].to_list()
+    
+    top_keywords = extract_keywords_tfidf(document,top_n=top_n)
     tfidf_figures = plot_tfidf_keywords(top_keywords, top_n=top_n)
-    word2vec_figure = generate_word2vec_word_cloud(documents, top_n=top_n)
+    word2vec_figure = generate_word2vec_word_cloud(document, top_n=top_n)
 
     results = {
         "tfidf_figures": json.loads(tfidf_figures),
@@ -269,7 +276,43 @@ def text_statistics():
         } 
         return jsonify(results), 200
 
+@app.route('/ngrams_analysis', methods=['POST'])
+def Ngrams_analysis():
+    data = request.json
+    filename = data.get('filename')
+    n_range = data.get('n_range', [1, 6])
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
+
+    file_path = os.path.join(os.getcwd(), UPLOAD_FOLDER, filename)
+    # Load data into DataFrame
+    df = load_data_df(file_path)
+    text_col_names = ['tweet', 'Tweet', 'text', 'Text', 'clean_text', 'Clean_text']
+    text_col = get_column_name(df,text_col_names)
+    df['clean_text'] = process_tweets_in_chunks(df[text_col])
+    plots = analyze_ngrams(df, 'clean_text', n_range)
+    
+    return jsonify(plots), 200
 
 
+@app.route('/classify_samples', methods=['POST'])
+def classify_samples():
+    # Get the request data
+    data = request.json
+    filename = data.get('filename')
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
+    
+    file_path = os.path.join(os.getcwd(), UPLOAD_FOLDER, filename)
+    df = load_data_df(file_path)
+    df = df.sample(200,random_state=42)
+       
+    try:
+        # Classify tweets and save the results
+        result_json = classify_tweets_from_df(df,device)
+        return jsonify({'message': 'Classification complete', 'data': result_json}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+   
 if __name__ == '__main__':
     app.run(debug=True)
