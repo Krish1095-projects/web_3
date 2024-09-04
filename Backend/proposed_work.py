@@ -107,19 +107,13 @@ quantized_model = torch.quantization.quantize_dynamic(
 )
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
-# Function to classify tweet
-def classify_tweet_proposed(tweet, device):
+
+def classify_tweet_proposed(tweet,device):
     quantized_model.eval()
-    # Tokenize the input tweet
     inputs = tokenizer(tweet, return_tensors="pt", truncation=True, padding=True,max_length=140)
     input_ids = inputs['input_ids'].to(device)
     attentions = inputs['attention_mask'].to(device)
-    
-    # Forward pass through the model
     with torch.no_grad():
-        logits, _ = quantized_model(input_ids, attentions)
-    
-    # Apply sigmoid to get probabilities
-    probabilities = torch.sigmoid(logits)
-    
+        outputs,_ = quantized_model(input_ids, attentions)
+    probabilities = torch.sigmoid(outputs)
     return probabilities.tolist()

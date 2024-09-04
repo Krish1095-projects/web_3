@@ -125,7 +125,7 @@ const ExistingWork = () => {
                   Classification Results:
                 </h3>
                 <p>
-                  The probability of this tweet being misinformation is{" "}
+                  The probability of this tweet being True information is{" "}
                   {probabilities[0][0] * 100} %
                 </p>
                 <CircularBar
@@ -133,7 +133,7 @@ const ExistingWork = () => {
                   color="red"
                 />
                 <p>
-                  The probability of this tweet being true information is{" "}
+                  The probability of this tweet being Misinformation is{" "}
                   {probabilities[0][1] * 100} %
                 </p>
                 <CircularBar

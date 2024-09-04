@@ -202,10 +202,10 @@ const ProposedWork = () => {
                 {probabilities && (
                   <div>
                     <h3 className="text-lg font-semibold">Classification Results:</h3>
-                    <p>The probability of this tweet being misinformation is {probabilities[0][0] * 100} %</p>
-                    <CircularBar percentage={probabilities[0][0] * 100} color="red" />
-                    <p>The probability of this tweet being true information is {probabilities[0][1] * 100} %</p>
-                    <CircularBar percentage={probabilities[0][1] * 100} color="green" />
+                    <p>The probability of this tweet being True Information is {probabilities[0][0] * 100} %</p>
+                    <CircularBar percentage={probabilities[0][0] * 100} color="green" />
+                    <p>The probability of this tweet being Misinformation is {probabilities[0][1] * 100} %</p>
+                    <CircularBar percentage={probabilities[0][1] * 100} color="red" />
                   </div>
                 )}
                 {explanation && <BarChart data={explanation} />}
