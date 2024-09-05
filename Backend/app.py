@@ -294,9 +294,33 @@ def Ngrams_analysis():
     
     return jsonify(plots), 200
 
+@app.route('/generate_prediction_report', methods=['POST'])
+def generate_prediction_report():
+    # Get the request data
+    data = request.json
+    filename = data.get('filename')
+    if not filename:
+        return jsonify({"error": "Filename not provided"}), 400
+    
+    file_path = os.path.join(os.getcwd(), UPLOAD_FOLDER, filename)
+    df = load_data_df(file_path)
+    df = df.sample(200,random_state=42)
+    try:
+        prediction_report, metrics = compute_metrics(df,device)
+        prediction_report_json = prediction_report.to_json(orient='records')  # or orient='split', 'index', etc. depending on your needs
 
-@app.route('/classify_samples', methods=['POST'])
-def classify_samples():
+        final_report = {
+            "prediction_report":prediction_report_json,
+            "performance_results":metrics
+        }
+    
+        return jsonify(final_report),200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+@app.route('/analyze_performance_metrics', methods=['POST'])
+def analyze_samples():
     # Get the request data
     data = request.json
     filename = data.get('filename')
@@ -309,8 +333,16 @@ def classify_samples():
        
     try:
         # Classify tweets and save the results
-        result_json = classify_tweets_from_df(df,device)
-        return jsonify({'message': 'Classification complete', 'data': result_json}), 200
+        confusion_matrix_plot,\
+            text_length_distribution,roc_curve_plot,\
+                performance_metrics_plot = Analyze_performance_metrics(df,device)
+        multi_results ={
+            "confusion_matrix_plot":confusion_matrix_plot,
+            "text_length_distribution":text_length_distribution,
+            "roc_curve_plot":roc_curve_plot,
+            "performance_metrics_plot":performance_metrics_plot
+        }
+        return jsonify(multi_results),200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
    

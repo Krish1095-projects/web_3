@@ -1,13 +1,12 @@
 import gsap from "gsap";
 import React, { useEffect, useRef, useState } from "react";
-import img from "../images/student.png";
 import krish from "../images/krishna_kumar.png";
 import mary from "../images/mary.png";
 import akila from "../images/akila.png";
 import saru from "../images/saru.png";
-import robin from "../images/robin.jpg"
+import robin from "../images/robin.jpg";
+import Publications from "./PublicationComponent";
 // MemberCard Component
-
 const MemberCard = ({ name, info, role, imgSrc, isProfessor }) => {
   const [isZoomed, setIsZoomed] = useState(false);
   const cardRef = useRef(null);
@@ -84,69 +83,63 @@ const ProjectDetails = () => {
   }, []);
 
   return (
-    <div className="p-8 rounded-lg shadow-md bg-red-500 mb-10" ref={faqRef}>
-      <h2 className="text-4xl font-bold mb-4 text-center text-white">
-        Research Team
-      </h2>
-      <div className="mb-6 flex flex-col items-center text-white">
-        <div className="flex flex-row justify-center items-center gap-3 mb-4">
-          {/* <h3 className="text-xl font-semibold">Name:</h3> */}
-          {/* <p className="text-black text-5xl font-bold text-center">
-          Content-based attention multilingual BERT model
-          </p> */}
+    <div className="flex justify-between p-8 rounded-lg shadow-md bg-red-500 mb-10">
+      <div className="w-1/2 p-4 rounded-lg">
+        <h2 className="text-4xl font-bold mb-4 text-center text-white">Research Team</h2>
+        <div className="mb-6 flex flex-col items-center text-white">
+          <h3 className="text-xl font-semibold mb-2">Research Co-ordinators</h3>
+          <div className="flex flex-wrap justify-center gap-8">
+            <MemberCard
+              name="Dr. (Mrs.) V. Akila"
+              info="ASSOCIATE PROFESSOR, PTU"
+              role="Principal Investigator"
+              isProfessor={true}
+              imgSrc={akila}
+            />
+            <MemberCard
+              name="Dr. K. Saruladha"
+              info="PROFESSOR, PTU"
+              role="Co-investigator"
+              isProfessor={true}
+              imgSrc={saru}
+            />
+          </div>
         </div>
-        <h3 className="text-xl font-semibold mb-2">Research Co-ordinators</h3>
-        <div className="flex flex-wrap justify-center gap-8">
-          <MemberCard
-            name="Dr. (Mrs.) V. Akila"
-            info="ASSOCIATE PROFESSOR, PTU"
-            role="Principal Investigator"
-            isProfessor={true}
-            imgSrc={akila}
-          />
-          <MemberCard
-            name="Dr. K. Saruladha"
-            info="PROFESSOR, PTU"
-            role="Co-investigator"
-            isProfessor={true}
-            imgSrc={saru}
-          />
+        <div>
+          <h3 className="text-xl font-semibold text-white mb-4 text-center">Research Associates</h3>
+          <div className="flex flex-wrap justify-center gap-8">
+            <MemberCard
+              name="Krishna kumar"
+              role="Project Associate"
+              imgSrc={krish}
+            />
+            <MemberCard
+              name="Rosaria Gilmary"
+              role="Research Associate"
+              imgSrc={mary}
+            />
+          </div>
+        </div>
+        <br />
+        <div>
+          <h3 className="text-xl font-semibold text-white mb-4 text-center">Implementation Contributors</h3>
+          <div className="flex flex-wrap justify-center gap-8">
+            <MemberCard
+              name="Krishna Kumar"
+              imgSrc={krish}
+            />
+            <MemberCard
+              name="Michael Robin K"
+              role="Student"
+              imgSrc={robin}
+            />
+          </div>
         </div>
       </div>
-      <div>
-        <h3 className="text-xl font-semibold text-white mb-4 text-center">Research Associates</h3> 
-        <div className="flex flex-wrap justify-center gap-8">
-          <MemberCard
-            name="Krishna kumar"
-            // info="20CS1073"
-            role="Project Associate"
-            imgSrc={krish}
-          />
-          <MemberCard
-            name="Rosaria Gilmary"
-            //info="20CS1072"
-            role="Research Associate"
-            imgSrc={mary}
-          />
-        </div>
-      </div>
-      <br/>
-      <br/>
-      <div>
-        <h3 className="text-xl font-semibold text-white mb-4 text-center">Implementation Contributors</h3>
-        <div className="flex flex-wrap justify-center gap-8">
-          <MemberCard
-            name="Krishna Kumar"
-            //info="20CS1073"
-            imgSrc={krish}
-          />
-          <MemberCard
-            name="Michael Robin K"
-            role="Student"
-            imgSrc={robin}
-          />
-        </div>
-        
+
+      {/* Publications Panel */}
+      <div className="w-1/2 p-4 rounded-lg">
+          <Publications/>
       </div>
     </div>
   );

@@ -34,7 +34,7 @@ export const Implementation = () => {
   return (
     <div className="flex flex-col  w-[90%] bg-red-500 shadow-lg p-6 rounded-lg mb-20 mx-20" ref={faqRef}>
       <h1 className="flex justify-center items-center text-white font-bold  mb-10 text-3xl text-center">
-        Enhancing Misinformation Detection on Twitter with a Content-Attention-Based Multilingual BERT Model
+        Misinformation Detection on Twitter with a Content-Attention-Based Multilingual BERT Model
       </h1>
       <div className="flex flex-row mx-10 w-full  items-center h-300 justify-around">
 

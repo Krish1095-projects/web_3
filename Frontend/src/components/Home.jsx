@@ -5,7 +5,6 @@ import HeroComponent from "./Hero";
 import HeaderComponent from "./Header";
 import ProjectDetails from "./Project";
 import DescriptionComponent from "./descriptionComponent";
-import Publications from "./PublicationComponent";
 
 const HomePage = () => {
   return (
@@ -14,7 +13,6 @@ const HomePage = () => {
     <HeroComponent />
     <Implementation/>
     <ProjectDetails/>
-    <Publications/>
     <Faq/>
     <DescriptionComponent/>
     

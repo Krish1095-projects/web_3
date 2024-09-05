@@ -11,6 +11,7 @@ import KeywordExtractionVisualization from './KeywordExtractionVisualization';
 import WordCloudVisualization from './WordCloudVisualization';
 import HistogramComponent from './HistogramComponent';
 import NGramVisualization from './NGramVisualization';
+import PredictiveAnalysisVisualization from './PredictiveAnalysis';
 
 const EDADashboard = () => {
     const { filename } = useFileContext(); // Get the filename from context
@@ -18,10 +19,10 @@ const EDADashboard = () => {
     const [showTextAnalysisSubMenu, setShowTextAnalysisSubMenu] = useState(false);
     const [showDataDistributionSubMenu, setShowDataDistributionSubMenu] = useState(false);
     const [content, setContent] = useState(null); // State to manage right panel content
-    const [numTopics, setNumTopics] = useState(25);
+    const [numTopics] = useState(25);
     const [loading, setLoading] = useState(false); // State to manage loading
     const [topN, setTopN] = useState(); // State for top_n
-    const [n_gram, setN_gram] = useState([1,6]); // State for top_n
+    const [n_gram] = useState([1,6]); // State for top_n
 
     const togglePanel = () => {
         setIsPanelOpen(prevState => !prevState); // Toggle panel visibility
@@ -101,6 +102,25 @@ const EDADashboard = () => {
             <div>
                 <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
                     <h3 className="text-xl font-semibold text-red-600 flex items-center">
+                        Important Note
+                    </h3>
+                    <p className="text-black leading-relaxed mb-2">
+                        This application is a prototype designed to explore and predict test samples related to COVID-19 tweets and news.
+                    </p>
+                <ul className="list-disc list-inside pl-4 text-gray-700">
+                    <li className="mb-2">Do not use a dataset with more than 200 samples.</li>
+                    <li className="mb-2">Ensure the feature names match the keywords provided below.</li>
+                    <li className="mb-2">
+                    For text features, accepted names are: 'tweet', 'Tweet', 'text', 'Text', 'clean_text', 'Clean_text'.
+                    </li>
+                    <li className="mb-2">
+                    For label features, accepted names are: 'label', 'target', 'Target', 'Label', 'class', 'Class'.
+                    </li>
+                </ul>
+                </div>
+
+                <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+                    <h3 className="text-xl font-semibold text-red-600 flex items-center">
                         Descriptive Statistics
                     </h3>
                     <p className="text-black leading-relaxed mb-2">
@@ -147,10 +167,9 @@ const EDADashboard = () => {
                         Predictive Analysis
                     </h3>
                     <p className="text-black leading-relaxed mb-2">
-                        Leverage historical data to forecast future trends. Apply machine learning algorithms to build models that predict outcomes based on your data.
+                        Leverage historical data to forecast future trends. Apply our CA-BERT model to predict outcomes based on your data.
                     </p>
                     <ul className="list-disc list-inside pl-4 text-gray-700">
-                        <li className="mb-2">Create models to predict future events.</li>
                         <li className="mb-2">Evaluate model performance and tune parameters.</li>
                         <li className="mb-2">Visualize predictions against actual data for validation.</li>
                     </ul>
@@ -384,6 +403,40 @@ const EDADashboard = () => {
         }
     };
 
+    const handlePredictionAnalysis= async () => {
+        if (!filename) {
+            alert("No filename available. Please upload a file.");
+            return;
+        }
+        setLoading(true); // Start loading
+    
+        try {
+            const response = await fetch("http://localhost:5000/analyze_performance_metrics", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({filename, n_range:n_gram}),
+            });
+    
+            if (response.ok) {
+                const results = await response.json();
+    
+                setContent(
+                    <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
+                    <PredictiveAnalysisVisualization performance_results ={results}/>
+                    </div>
+                );
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error}`);
+            }
+        } catch (error) {
+            console.error("Error fetching word_cloud generated results:", error);
+        } finally {
+            setLoading(false); // Stop loading
+        }
+    };
 
     return (
         <div className="flex flex-col h-screen bg-gray-100">
@@ -446,7 +499,8 @@ const EDADashboard = () => {
                         </div>
                     )}
 
-                    <button className="py-3 px-4 bg-red-600 hover:bg-red-400 transition duration-200 rounded-md text-left font-semibold mb-3 transform hover:scale-105">Predictive Analysis</button>
+                    <button className="py-3 px-4 bg-red-600 hover:bg-red-400 transition duration-200 rounded-md text-left font-semibold mb-3 transform hover:scale-105"
+                    onClick={handlePredictionAnalysis}>Predictive Analysis</button>
                 </div>
 
                 {/* Toggle Button with Icon */}

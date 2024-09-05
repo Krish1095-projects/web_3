@@ -98,7 +98,7 @@ def load_model(model_checkpoint):
     return model, optimizer, device
 
 
-model_checkpoint = os.path.join(os.getcwd(),'bert_weights_epoch_1_92.187.pt')
+model_checkpoint = os.path.join(os.getcwd(),'models','bert_weights_epoch_1_92.187.pt')
 model, optimizer,device = load_model(model_checkpoint)
 quantized_model = torch.quantization.quantize_dynamic(
     model,
@@ -108,12 +108,23 @@ quantized_model = torch.quantization.quantize_dynamic(
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 
-def classify_tweet_proposed(tweet,device):
+def classify_tweet_proposed(tweet, device):
+    # Set the model to evaluation mode
     quantized_model.eval()
-    inputs = tokenizer(tweet, return_tensors="pt", truncation=True, padding=True,max_length=140)
+    # Tokenize the tweet with truncation and padding
+    inputs = tokenizer(tweet, return_tensors="pt", truncation=True, padding='max_length', max_length=140)
+    # Move input tensors to the specified device
     input_ids = inputs['input_ids'].to(device)
-    attentions = inputs['attention_mask'].to(device)
+    attention_mask = inputs['attention_mask'].to(device)
     with torch.no_grad():
-        outputs,_ = quantized_model(input_ids, attentions)
-    probabilities = torch.sigmoid(outputs)
-    return probabilities.tolist()
+        # Get the model outputs (assuming the model returns outputs, and you are not using a hidden state)
+        outputs = quantized_model(input_ids, attention_mask)
+        # Check if outputs contain logits or probabilities, adjust accordingly
+        if isinstance(outputs, tuple):
+            logits = outputs[0]  # Typically the first element contains logits
+        else:
+            logits = outputs
+    # Apply sigmoid to get probabilities
+    probabilities = torch.sigmoid(logits)
+    # Convert probabilities to a list and return
+    return probabilities.cpu().tolist()

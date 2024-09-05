@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "CA-BERT-APP",
+  "name": "Content-Attention Based BERT application",
   "icons": [
     {
       "src": "favicon.ico",
@@ -18,7 +18,7 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "http://localhost:3000/home",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"
