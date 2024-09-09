@@ -88,23 +88,32 @@ def load_model(model_checkpoint):
     checkpoint = torch.load(model_checkpoint, map_location=torch.device('cpu'))
     model,optimizer,device,num_classes = build_model(vocab_size=42903, type_vocab=1, max_position_embedding=140, model_name='bert-base-uncased',
                 num_classes=2)
-    model.load_state_dict(checkpoint['model'])
     optimizer = torch.optim.AdamW(model.parameters(), lr=2e-5)
-    optimizer.load_state_dict(checkpoint['optimizer'])
-    
     # Ensure the model is in evaluation mode
     model.eval()
     
     return model, optimizer, device
 
 
-model_checkpoint = os.path.join(os.getcwd(),'models','bert_weights_epoch_1_92.187.pt')
+model_checkpoint = os.path.join(os.getcwd(),'models','QMT_P.pt')
 model, optimizer,device = load_model(model_checkpoint)
 quantized_model = torch.quantization.quantize_dynamic(
     model,
     {torch.nn.Linear},
     dtype=torch.qint8  # Use int8 for quantization
 )
+# Load the saved model and optimizer states
+checkpoint = torch.load(model_checkpoint)
+
+# Load the saved model state into the quantized model
+quantized_model.load_state_dict(checkpoint['model_state_dict'])
+
+# Load the saved optimizer state into the optimizer
+optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+# Make sure the model is in evaluation mode if you're not training
+quantized_model.eval()
+
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 

@@ -12,6 +12,7 @@ import WordCloudVisualization from './WordCloudVisualization';
 import HistogramComponent from './HistogramComponent';
 import NGramVisualization from './NGramVisualization';
 import PredictiveAnalysisVisualization from './PredictiveAnalysis';
+import hostname from '../config';
 
 const EDADashboard = () => {
     const { filename } = useFileContext(); // Get the filename from context
@@ -41,7 +42,7 @@ const EDADashboard = () => {
         try {
             console.log("New topN value received:", newTopN); 
             setTopN(newTopN);
-            const response = await axios.post('http://localhost:5000/keyword_extraction', { top_n: newTopN, filename });
+            const response = await axios.post(hostname+"/keyword_extraction", { top_n: newTopN, filename });
             setContent(
                 <div className="mb-6 p-4 bg-white rounded-lg shadow-md">
                     <KeywordExtractionVisualization results={response.data} />
@@ -63,7 +64,7 @@ const EDADashboard = () => {
         setLoading(true); // Start loading
 
         try {
-            const response = await fetch("http://localhost:5000/des_stats", {
+            const response = await fetch(hostname+"/des_stats", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -192,7 +193,7 @@ const EDADashboard = () => {
         }
         setLoading(true); // Start loading
         try {
-            const response = await fetch("http://localhost:5000/topic_modeling", {
+            const response = await fetch(hostname+"/topic_modeling", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -234,7 +235,7 @@ const EDADashboard = () => {
         setLoading(true); // Start loading
 
         try {
-            const response = await fetch("http://localhost:5000/sentiment_analysis", {
+            const response = await fetch(hostname+"/sentiment_analysis", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -272,7 +273,7 @@ const EDADashboard = () => {
         setLoading(true); // Start loading
     
         try {
-            const response = await fetch("http://localhost:5000/keyword_extraction", {
+            const response = await fetch(hostname+"/keyword_extraction", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -307,7 +308,7 @@ const EDADashboard = () => {
         setLoading(true); // Start loading
     
         try {
-            const response = await fetch("http://localhost:5000/wordclouds", {
+            const response = await fetch(hostname+"/wordclouds", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -341,7 +342,7 @@ const EDADashboard = () => {
         setLoading(true); // Start loading
     
         try {
-            const response = await fetch("http://localhost:5000/histograms", {
+            const response = await fetch(hostname+"/histograms", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -376,7 +377,7 @@ const EDADashboard = () => {
         setLoading(true); // Start loading
     
         try {
-            const response = await fetch("http://localhost:5000/ngrams_analysis", {
+            const response = await fetch(hostname+"/ngrams_analysis", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -411,7 +412,7 @@ const EDADashboard = () => {
         setLoading(true); // Start loading
     
         try {
-            const response = await fetch("http://localhost:5000/analyze_performance_metrics", {
+            const response = await fetch(hostname+"/analyze_performance_metrics", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

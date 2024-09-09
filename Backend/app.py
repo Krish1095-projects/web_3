@@ -18,8 +18,7 @@ import nltk
 import warnings
 
 warnings.filterwarnings('ignore')
-# Initialize NLTK resources
-nltk.download('all',quiet=True)
+
 
 app = Flask(__name__, template_folder='templates')
 UPLOAD_FOLDER = 'uploads'
@@ -346,5 +345,12 @@ def analyze_samples():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
    
+@app.route('/home', methods=['POST'])
+def home():
+    print("WELCOME"),200
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Initialize NLTK resources
+    #nltk.download('all')
+    #nltk.download('stopwords')
+    app.run(host='0.0.0.0',port =5000, debug=False)

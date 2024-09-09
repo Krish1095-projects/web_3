@@ -21,4 +21,4 @@ torch.save({
     'model_state_dict': quantized_model.state_dict(),
     'optimizer_state_dict': optimizer.state_dict(),
     'tokenizer': tokenizer
-}, os.path.join(os.getcwd(),'quantized_models','QMT_P.pt'))
+}, os.path.join(os.getcwd(),'models','QMT_P.pt'))

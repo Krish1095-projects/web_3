@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import hostname from '../config';
+import { FileProvider, useFileContext } from "../context/FileContext"; // Import FileProvider and useFileContext
 import CircularBar from "./CircularBar";
 import BarChart from "./ExplanationComponent";
 import HighlightedSentence from "./HighlightedWord";
-import PreviewDataTable from "./PreviewDataTable"; 
-import { FileProvider, useFileContext } from "../context/FileContext"; // Import FileProvider and useFileContext
+import PreviewDataTable from "./PreviewDataTable";
 
 const ProposedWork = () => {
   const { setFilename } = useFileContext(); // Get setFilename from context
@@ -44,7 +45,7 @@ const ProposedWork = () => {
 
     // Classify the tweet
     try {
-      const classifyResponse = await fetch("http://localhost:5000/classify", {
+      const classifyResponse = await fetch(hostname+'/classify', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,7 +73,8 @@ const ProposedWork = () => {
     setExplanationLoading(true);
 
     try {
-      const explainResponse = await fetch("http://localhost:5000/explain", {
+  
+      const explainResponse = await fetch(hostname+"/explain", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,7 +110,7 @@ const ProposedWork = () => {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:5000/upload-file", {
+      const response = await fetch(hostname+"/upload-file", {
         method: "POST",
         body: formData,
       });
@@ -134,7 +136,7 @@ const ProposedWork = () => {
     const filename = file.name; // Use the uploaded file's name
   
     try {
-      const response = await fetch("http://localhost:5000/preview-data", {
+      const response = await fetch(hostname+"/preview-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -181,7 +183,7 @@ const ProposedWork = () => {
     const filename = file.name; // Use the uploaded file's name
   
     try {
-      const response = await fetch("http://localhost:5000/generate_prediction_report", {
+      const response = await fetch(hostname+"/generate_prediction_report", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

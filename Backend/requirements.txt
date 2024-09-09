@@ -1,5 +1,4 @@
-beautifulsoup4==4.12.3
-dask==2024.8.2
+dask
 demoji==1.1.0
 Flask==3.0.3
 Flask_Cors==5.0.0
@@ -7,7 +6,7 @@ fonttools==4.51.0
 gensim==4.3.3
 lime==0.2.0.1
 nltk==3.9.1
-numpy==2.1.1
+numpy
 pandas==2.2.2
 plotly==5.24.0
 pyLDAvis==3.4.1
@@ -18,3 +17,4 @@ spacy==3.7.6
 textblob==0.18.0.post0
 torch==2.4.0
 wordcloud==1.9.3
+transformers
