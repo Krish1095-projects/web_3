@@ -45,7 +45,7 @@ const ProposedWork = () => {
 
     // Classify the tweet
     try {
-      const classifyResponse = await fetch(hostname+'/classify', {
+      const classifyResponse = await fetch('${hostname}/classify', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -57,6 +57,8 @@ const ProposedWork = () => {
 
       if (classifyResponse.ok) {
         const classifyData = await classifyResponse.json();
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:3582825929.
+        console.log("Classification Result:", "${hostname}/classify")
         setProbabilities(classifyData.probabilities);
       } else {
         console.error("Failed to classify tweet");
@@ -74,7 +76,7 @@ const ProposedWork = () => {
 
     try {
   
-      const explainResponse = await fetch(hostname+"/explain", {
+      const explainResponse = await fetch("${hostname}/explain", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,7 +112,7 @@ const ProposedWork = () => {
     formData.append("file", file);
 
     try {
-      const response = await fetch(hostname+"/upload-file", {
+      const response = await fetch("${hostname}/upload-file", {
         method: "POST",
         body: formData,
       });
@@ -136,7 +138,7 @@ const ProposedWork = () => {
     const filename = file.name; // Use the uploaded file's name
   
     try {
-      const response = await fetch(hostname+"/preview-data", {
+      const response = await fetch("${hostname}/preview-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -183,7 +185,7 @@ const ProposedWork = () => {
     const filename = file.name; // Use the uploaded file's name
   
     try {
-      const response = await fetch(hostname+"/generate_prediction_report", {
+      const response = await fetch("${hostname}/generate_prediction_report", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
