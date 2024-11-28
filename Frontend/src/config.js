@@ -1,2 +1,2 @@
-const hostname = "http:///13.53.207.59:5000";
+const hostname = "http://13.60.242.36:5000";
 export default hostname;
