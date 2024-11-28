@@ -75,7 +75,7 @@ const ProposedWork = () => {
 
     try {
   
-      const explainResponse = await fetch("${hostname}/explain", {
+      const explainResponse = await fetch(`${hostname}/explain`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -111,7 +111,7 @@ const ProposedWork = () => {
     formData.append("file", file);
 
     try {
-      const response = await fetch("${hostname}/upload-file", {
+      const response = await fetch(`${hostname}/upload-file`, {
         method: "POST",
         body: formData,
       });
@@ -137,7 +137,7 @@ const ProposedWork = () => {
     const filename = file.name; // Use the uploaded file's name
   
     try {
-      const response = await fetch("${hostname}/preview-data", {
+      const response = await fetch(`${hostname}/preview-data`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -184,7 +184,7 @@ const ProposedWork = () => {
     const filename = file.name; // Use the uploaded file's name
   
     try {
-      const response = await fetch("${hostname}/generate_prediction_report", {
+      const response = await fetch(`${hostname}/generate_prediction_report`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
