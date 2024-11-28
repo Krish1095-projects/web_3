@@ -58,7 +58,7 @@ const ProposedWork = () => {
       if (classifyResponse.ok) {
         const classifyData = await classifyResponse.json();
 // Suggested code may be subject to a license. Learn more: ~LicenseLog:3582825929.
-        console.log("Classification Result:", "${hostname}/classify")
+        console.log(`Classification Result:, ${hostname}/classify`)
         setProbabilities(classifyData.probabilities);
       } else {
         console.error("Failed to classify tweet");
