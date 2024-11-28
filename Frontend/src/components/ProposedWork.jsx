@@ -45,7 +45,7 @@ const ProposedWork = () => {
 
     // Classify the tweet
     try {
-      const classifyResponse = await fetch('${hostname}/classify', {
+      const classifyResponse = await fetch(`${hostname}/classify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -57,7 +57,6 @@ const ProposedWork = () => {
 
       if (classifyResponse.ok) {
         const classifyData = await classifyResponse.json();
-// Suggested code may be subject to a license. Learn more: ~LicenseLog:3582825929.
         console.log(`Classification Result:, ${hostname}/classify`)
         setProbabilities(classifyData.probabilities);
       } else {
